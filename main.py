@@ -6,8 +6,8 @@ NAME = "3D-printed Metric Threads V2"
 UNIT = "mm"
 ANGLE = 60.0
 SIZES = list(range(8, 51))
-PITCHES = [3.5, 5.0]
-OFFSETS = [.0, .1, .2, .4, .8]
+PITCHES = [2.5, 3.5, 5.0]
+OFFSETS = [0.0, 0.1, 0.2, 0.4, 0.8]
 
 
 def designator(val: float):
@@ -46,7 +46,9 @@ class Metric3Dprinted(ThreadProfile):
         def __init__(self, diameter, pitch):
             self.nominalDiameter = diameter
             self.pitch = pitch
-            self.name = "M{}x{}".format(designator(self.nominalDiameter), designator(self.pitch))
+            self.name = "M{}x{}".format(
+                designator(self.nominalDiameter), designator(self.pitch)
+            )
 
     def __init__(self):
         self.offsets = OFFSETS
@@ -64,10 +66,10 @@ class Metric3Dprinted(ThreadProfile):
 
             # see https://en.wikipedia.org/wiki/ISO_metric_screw_thread
             P = designation.pitch
-            H = 1/math.tan(math.radians(ANGLE/2)) * (P/2)
+            H = 1 / math.tan(math.radians(ANGLE / 2)) * (P / 2)
             D = designation.nominalDiameter
-            Dp = D - H/2
-            Dmin = D - 5*H/8
+            Dp = D - H / 2
+            Dmin = D - 5 * H / 8
 
             t = Thread()
             t.gender = "external"
@@ -91,7 +93,7 @@ class Metric3Dprinted(ThreadProfile):
 def generate():
     profile = Metric3Dprinted()
 
-    root = ET.Element('ThreadType')
+    root = ET.Element("ThreadType")
     tree = ET.ElementTree(root)
 
     ET.SubElement(root, "Name").text = NAME
@@ -105,21 +107,31 @@ def generate():
         ET.SubElement(thread_size_element, "Size").text = str(size)
         for designation in profile.designations(size):
             designation_element = ET.SubElement(thread_size_element, "Designation")
-            ET.SubElement(designation_element, "ThreadDesignation").text = designation.name
+            ET.SubElement(
+                designation_element, "ThreadDesignation"
+            ).text = designation.name
             ET.SubElement(designation_element, "CTD").text = designation.name
             ET.SubElement(designation_element, "Pitch").text = str(designation.pitch)
             for thread in profile.threads(designation):
                 thread_element = ET.SubElement(designation_element, "Thread")
                 ET.SubElement(thread_element, "Gender").text = thread.gender
                 ET.SubElement(thread_element, "Class").text = thread.clazz
-                ET.SubElement(thread_element, "MajorDia").text = "{:.4g}".format(thread.majorDia)
-                ET.SubElement(thread_element, "PitchDia").text = "{:.4g}".format(thread.pitchDia)
-                ET.SubElement(thread_element, "MinorDia").text = "{:.4g}".format(thread.minorDia)
+                ET.SubElement(thread_element, "MajorDia").text = "{:.4g}".format(
+                    thread.majorDia
+                )
+                ET.SubElement(thread_element, "PitchDia").text = "{:.4g}".format(
+                    thread.pitchDia
+                )
+                ET.SubElement(thread_element, "MinorDia").text = "{:.4g}".format(
+                    thread.minorDia
+                )
                 if thread.tapDrill:
-                    ET.SubElement(thread_element, "TapDrill").text = "{:.4g}".format(thread.tapDrill)
+                    ET.SubElement(thread_element, "TapDrill").text = "{:.4g}".format(
+                        thread.tapDrill
+                    )
 
     ET.indent(tree)
-    tree.write('3DPrintedMetricV2.xml', encoding='UTF-8', xml_declaration=True)
+    tree.write("3DPrintedMetricV2.xml", encoding="UTF-8", xml_declaration=True)
 
 
 generate()
